@@ -1,6 +1,6 @@
 ---
 title : 'GCC 2024: My Experience'
-date : 2024-03-08T12:47:16+05:30
+date : 2024-02-28T12:47:16+05:30
 draft : false
 showToc: true
 ---

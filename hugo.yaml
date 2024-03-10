@@ -8,11 +8,16 @@ params:
   homeInfoParams:
     Title: "Hi there \U0001F44B"
     Content: >-
-      Welcome to my website.      
+      Welcome to my Blog, lets just call it Whispers on the Wind.      
   socialIcons:
     - name: email
       url: 'aadarsht087@gmail.com'
-
+    - name: linkedin
+      url: 'www.linkedin.com/in/aadarsh-t-r'
+    - name: github
+      url: 'https://github.com/Rav3nf0'
+    - name: twitter
+      url: 'https://twitter.com/Rav3nf0'
 menu:
   main:
   - identifier: home
@@ -23,3 +28,7 @@ menu:
     name: Blog
     url: /posts/
     weight: 20
+  - identifier: about
+    name: About
+    url: /about/
+    weight: 30
