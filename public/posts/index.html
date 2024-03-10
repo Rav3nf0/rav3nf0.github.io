@@ -28,34 +28,6 @@
         }
 
     </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --code-block-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
 </noscript><meta property="og:title" content="Posts" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
@@ -82,14 +54,10 @@
 </script>
 </head>
 
-<body class="list" id="top">
+<body class="list dark" id="top">
 <script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
+    if (localStorage.getItem("pref-theme") === "light") {
         document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
     }
 
 </script>
@@ -122,6 +90,16 @@
             </div>
         </div>
         <ul id="menu">
+            <li>
+                <a href="https://rav3nf0.github.io/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rav3nf0.github.io/posts/" title="Blog">
+                    <span class="active">Blog</span>
+                </a>
+            </li>
         </ul>
     </nav>
 </header>
@@ -134,7 +112,7 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">GCC 2024: The Experience of a Lifetime
+    <h2 class="entry-hint-parent">GCC 2024: My Experience
     </h2>
   </header>
   <div class="entry-content">
@@ -142,7 +120,7 @@
 A big shoutout to VueNow and Traboda for sponsoring this amazing trip!...</p>
   </div>
   <footer class="entry-footer"><span title='2024-03-08 12:47:16 +0530 IST'>March 8, 2024</span></footer>
-  <a class="entry-link" aria-label="post link to GCC 2024: The Experience of a Lifetime" href="https://rav3nf0.github.io/posts/gcc24/"></a>
+  <a class="entry-link" aria-label="post link to GCC 2024: My Experience" href="https://rav3nf0.github.io/posts/gcc24/"></a>
 </article>
     </main>
     
