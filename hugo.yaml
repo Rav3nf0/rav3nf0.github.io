@@ -18,6 +18,8 @@ params:
       url: 'https://github.com/Rav3nf0'
     - name: twitter
       url: 'https://twitter.com/Rav3nf0'
+    - name: medium
+      url: 'https://rav3nf0.medium.com/'
 menu:
   main:
   - identifier: home
