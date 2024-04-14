@@ -5,7 +5,7 @@ draft : false
 showToc: true
 ---
 
-# Dattebayo! My HTB Seasonal Conquest
+## Prologue
 
 Hey there, This blog is **not** gonna be about the technical nitty-gritty and would be more on my experience and the challenges I faced. Buckle up for a tale of triumph, tribulation, and teamwork – all with a dash of Naruto sprinkled in (dattebayo!). This is the story of my 13-week HTB seasonal conquest!
 > Yess, Naruto Fan here !!
