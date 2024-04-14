@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://rav3nf0.github.io/posts/gcc24/</loc>
-    <lastmod>2024-02-28T12:47:16+05:30</lastmod>
+    <loc>https://rav3nf0.github.io/posts/plat24/</loc>
+    <lastmod>2024-04-14T12:47:16+05:30</lastmod>
   </url><url>
     <loc>https://rav3nf0.github.io/posts/</loc>
-    <lastmod>2024-02-28T12:47:16+05:30</lastmod>
+    <lastmod>2024-04-14T12:47:16+05:30</lastmod>
   </url><url>
     <loc>https://rav3nf0.github.io/</loc>
+    <lastmod>2024-04-14T12:47:16+05:30</lastmod>
+  </url><url>
+    <loc>https://rav3nf0.github.io/posts/gcc24/</loc>
     <lastmod>2024-02-28T12:47:16+05:30</lastmod>
   </url><url>
     <loc>https://rav3nf0.github.io/categories/</loc>

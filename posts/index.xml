@@ -6,8 +6,17 @@
     <description>Recent content in Posts on Rav3nf0</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 28 Feb 2024 12:47:16 +0530</lastBuildDate>
+    <lastBuildDate>Sun, 14 Apr 2024 12:47:16 +0530</lastBuildDate>
     <atom:link href="https://rav3nf0.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dattebayo! My HTB Seasonal Conquest</title>
+      <link>https://rav3nf0.github.io/posts/plat24/</link>
+      <pubDate>Sun, 14 Apr 2024 12:47:16 +0530</pubDate>
+      <guid>https://rav3nf0.github.io/posts/plat24/</guid>
+      <description>Dattebayo! My HTB Seasonal Conquest Hey there, This blog is not gonna be about the technical nitty-gritty and would be more on my experience and the challenges I faced. Buckle up for a tale of triumph, tribulation, and teamwork – all with a dash of Naruto sprinkled in (dattebayo!). This is the story of my 13-week HTB seasonal conquest!
+Yess, Naruto Fan here !!
+The Mission: Reach for the Holo! HTB uses a ranking system based on the percentage of flags captured during the season.</description>
+    </item>
     <item>
       <title>GCC 2024: My Experience</title>
       <link>https://rav3nf0.github.io/posts/gcc24/</link>
