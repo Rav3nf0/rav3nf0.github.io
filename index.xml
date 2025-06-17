@@ -6,15 +6,23 @@
     <description>Recent content on Rav3nf0</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 23 May 2025 14:53:45 +0530</lastBuildDate>
+    <lastBuildDate>Tue, 17 Jun 2025 12:47:16 +0530</lastBuildDate>
     <atom:link href="https://rav3nf0.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Inside the BadSuccessor dMSA Attack</title>
+      <link>https://rav3nf0.github.io/posts/dmsa_pt1/</link>
+      <pubDate>Tue, 17 Jun 2025 12:47:16 +0530</pubDate>
+      <guid>https://rav3nf0.github.io/posts/dmsa_pt1/</guid>
+      <description>Microsoft&amp;rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&amp;rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&amp;rsquo;re calling it &amp;ldquo;BadSuccessor&amp;rdquo;—and it can lead to complete domain takeover.
+I&amp;rsquo;ve been diving deep into how dMSAs work, their authentication mechanisms, and the cool security flaws that let attackers go from minimal privileges to Domain Admin access by changing just two attributes.</description>
+    </item>
     <item>
       <title>About ME</title>
       <link>https://rav3nf0.github.io/about/</link>
       <pubDate>Fri, 23 May 2025 14:53:45 +0530</pubDate>
       <guid>https://rav3nf0.github.io/about/</guid>
       <description>I’m Aadarsh (aka Rav3nf0) — a security engineer, curious hacker, and builder at heart. I spend my days building secure, scalable systems… and my nights figuring out how to break them (ethically, of course 😈).
-🔐 What I Do Red teaming, pentesting, and secure code analysis Building internal tools for detection and prevention Writing &amp;amp; breaking scripts, sometimes at 3am Crafting CTFs and boot2root machines for learning 📌 Current Focus Preparing for CRTP and mastering Active Directory labs Leveling up in web app &amp;amp; infra security Weight training: chasing that 75kg goal 🏋️ Gotta REACH THE PEAK!</description>
+🔐 What I Do Red teaming, Application security, and secure code analysis Building internal tools for detection and prevention Writing &amp;amp; breaking scripts, sometimes at 3am Crafting CTFs and boot2root machines for learning 📌 Current Focus Exploring threat modeling, IAM misconfigs, and automation in Cloud Security and DevSecOps Leveling up in web app &amp;amp; infra security Weight training: chasing that 75kg goal 🏋️ Gotta REACH THE PEAK!</description>
     </item>
     <item>
       <title>GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory</title>
