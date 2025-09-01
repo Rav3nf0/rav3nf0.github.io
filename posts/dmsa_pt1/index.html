@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 <title>dMSA Trust Model &amp; Vulnerability | Rav3nf0</title>
 <meta name="keywords" content="Red Team, Active Directory, PrivEsc">
 <meta name="description" content="Microsoft&rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&rsquo;re calling it &ldquo;BadSuccessor&rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw.">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/posts/dmsa_pt1/">
+<link rel="canonical" href="https://rav3nf0.github.io/posts/dmsa_pt1/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.b609c58d5c11bb90b1a54e04005d74ad1ddf22165eb79f5533967e57df9c3b50.css" integrity="sha256-tgnFjVwRu5CxpU4EAF10rR3fIhZet59VM5Z&#43;V9&#43;cO1A=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="icon" href="https://rav3nf0.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://rav3nf0.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://rav3nf0.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://rav3nf0.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://rav3nf0.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/dmsa_pt1/">
+<link rel="alternate" hreflang="en" href="https://rav3nf0.github.io/posts/dmsa_pt1/">
 <noscript>
     <style>
         #theme-toggle,
@@ -28,6 +28,69 @@
 
     </style>
 </noscript>
+  
+
+<meta property="og:title" content="dMSA Trust Model &amp; Vulnerability" />
+<meta property="og:description" content="Microsoft&rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&rsquo;re calling it &ldquo;BadSuccessor&rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://rav3nf0.github.io/posts/dmsa_pt1/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-06-17T12:47:16+05:30" />
+<meta property="article:modified_time" content="2025-06-17T12:47:16+05:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="dMSA Trust Model &amp; Vulnerability"/>
+<meta name="twitter:description" content="Microsoft&rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&rsquo;re calling it &ldquo;BadSuccessor&rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://rav3nf0.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "dMSA Trust Model \u0026 Vulnerability",
+      "item": "https://rav3nf0.github.io/posts/dmsa_pt1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "dMSA Trust Model \u0026 Vulnerability",
+  "name": "dMSA Trust Model \u0026 Vulnerability",
+  "description": "Microsoft\u0026rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we\u0026rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they\u0026rsquo;re calling it \u0026ldquo;BadSuccessor\u0026rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw.",
+  "keywords": [
+    "Red Team", "Active Directory", "PrivEsc"
+  ],
+  "articleBody": "Microsoft’s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we’ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they’re calling it “BadSuccessor”—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw.\nI’ve been diving deep into how dMSAs work, their authentication mechanisms, and the cool security flaws that let attackers go from minimal privileges to Domain Admin access by changing just two attributes. Let me walk you through what I found.\nUnderstanding Delegated Managed Service Accounts (dMSAs) What is a dMSA? A Delegated Managed Service Account (dMSA) is Microsoft’s latest attempt at fixing service account management, introduced in Windows Server 2025. Unlike traditional service accounts where you’re constantly rotating passwords manually (or more likely, setting them to never expire—Don’t worry, we all have), dMSAs are supposed to be automatically managed by Active Directory with better security features.\nThe whole point is replacing legacy service accounts with modern, automatically managed accounts that don’t break your services during migration. Sounds great in theory.\nKey Benefits (or so they claimed):\nAutomatic password rotation Better security posture Seamless migration from legacy accounts Centralized management through Active Directory The Migration Architecture Here’s where things get interesting. dMSAs are designed to replace existing legacy service accounts through a structured migration process. This creates a link between the new dMSA and the old account it’s replacing—both accounts become aware of each other, which enables that “seamless transition” without service downtime that Microsoft promised.\nThe migration process involves several critical Active Directory attributes that, spoiler alert, become the attack vector:\nOn the dMSA object:\nmsDS-GroupMSAMembership - Controls which systems can use the dMSA msDS-ManagedAccountPrecededByLink - Points to the domain name of the old service account msDS-DelegatedMSAState - Tracks where we are in the migration On the old account being replaced:\nmsDS-SupersededManagedAccountLink - Points to the domain name of the new dMSA msDS-SupersededServiceAccountState - Migration status from the old account’s perspective The dMSA Migration Process Phase 1: Starting the Migration Command: Start-ADServiceAccountMigration\nWhen you start a migration, Active Directory does several things that’ll become important later:\nSets migration status to “in progress” (msDS-DelegatedMSAState = 1) Grants write permissions to the old account on the dMSA’s msDS-GroupMSAMembership attribute Creates bidirectional links between the dMSA and the old account Updates security descriptors to make the migration work Here’s the thing—during migrations, the old account gets temporary write access to msDS-GroupMSAMembership on the dMSA for smooth host authorization. While this isn’t directly exploited in BadSuccessor, it shows the overly trusting design that attackers can abuse by faking a migration entirely from the dMSA side.\nPhase 2: Finishing the Migration Command: Complete-ADServiceAccountMigration\nWhen you complete it:\nThe dMSA inherits SPNs, delegation settings, and other configurations The old account gets disabled Both accounts get marked as migration completed (msDS-DelegatedMSAState = 2) Migration Status Reference Value Status Description 0 Unknown Possibly disabled (Microsoft hasn’t documented this) 1 In Progress Migration started but not finished 2 Completed Migration done 3 Standalone dMSA created without any migration Microsoft hasn’t officially documented these values—researchers had to figure them out the hard way.\ndMSA Authentication Mechanisms Understanding how dMSA authentication works is crucial to getting why this attack is so devastating. The authentication flow changes significantly during different migration phases, and that’s where the problems start.\nAuthentication During Migration (Status = 1) When a service tries to authenticate using a legacy account during migration, here’s what happens:\nClient sends AS-REQ to authenticate as the legacy account (like svc_sql) KDC responds with AS-REP containing a special KERB-SUPERSEDED-BY-USER field pointing to the dMSA Compatible clients (Windows Server 2025/Windows 11 24H2) automatically: Extract the dMSA name from the response Query Active Directory for dMSA details (msDS-GroupMSAMembership, distinguishedName, objectClass) Automatically authorize the host by adding it to the dMSA’s membership list The Automatic Authorization Process: The legacy account uses its write permissions (granted when migration started) to automatically add requesting hosts to the dMSA’s authorized users list. This keeps services running smoothly but creates a massive security hole. Authentication After Migration (Status = 2) Once migration is done:\nLegacy account authentication fails with KRB-ERROR (account disabled) Error includes superseded-by information pointing to the dMSA Client automatically retries using dMSA credentials Authentication succeeds because the host was pre-authorized during migration This creates a transparent transition where services automatically switch from legacy accounts to dMSAs without anyone having to touch anything. Pretty sweet, until you realize how badly it can be abused. The PAC Inheritance Vulnerability Understanding Kerberos PAC The Privilege Attribute Certificate (PAC) is what actually matters for security in Kerberos tickets. It contains:\nUser’s Security Identifier (SID) Group memberships and their SIDs Additional privilege information Services use PAC data to make authorization decisions, so getting this wrong is catastrophic.\nThe Inheritance Flaw What should happen: A dMSA’s PAC should contain only its own security information.\nWhat actually happens: The dMSA’s PAC contains both its own SID and legitimate group memberships plus the superseded account’s SID and ALL its group memberships.\nReal-World Impact Example Let me give you a concrete example of how this goes wrong:\nLegacy Account: svc_backup (member of “Backup Operators” group) New dMSA: BACKUP_DMSA$ (configured with minimal database access permissions)\nWhat the admin thought would happen: Reduce attack surface by migrating from over-privileged legacy account to properly scoped dMSA.\nWhat actually happened:\ndMSA operates with intended minimal permissions BUT dMSA’s PAC includes “Backup Operators” group membership Services relying on PAC-based group membership checks grant unintended privileges like “Backup Operators” when the dMSA inherits them through a forged migration link Attack surface expanded instead of reduced Domain Admin Escalation Scenario Here’s the nightmare scenario:\nLegacy Account: svc_legacy (has Domain Admin rights from years ago—you know how it is) New dMSA: WEBAPP_DMSA$ (should only access web application resources) The problem:\ndMSA’s PAC inherits Domain Admin SID and group memberships Any compromised service using this dMSA effectively has Domain Admin privileges Migration increased the security risk instead of reducing it Conclusion The core problem is how dMSAs interact with their predecessors through loosely validated attributes and inherited trust. While the design aims for smooth integration without breaking services, it introduces unintended privilege inheritance that attackers can exploit.\nNow that you understand how dMSAs are supposed to work—and how they actually misbehave—let’s dig into how attackers turn this flaw into full-blown domain compromise.\nIn the Part 2 of this blog, I’ll walk you through BadSuccessor: a technique that lets low-privileged users forge migrations, hijack PACs, and escalate to Domain Admin or even Enterprise Admin with shocking ease.\n",
+  "wordCount" : "1114",
+  "inLanguage": "en",
+  "datePublished": "2025-06-17T12:47:16+05:30",
+  "dateModified": "2025-06-17T12:47:16+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rav3nf0.github.io/posts/dmsa_pt1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Rav3nf0",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://rav3nf0.github.io/favicon.ico"
+    }
+  }
+}
+</script>
 </head>
 
 <body class=" dark" id="top">
@@ -41,7 +104,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Rav3nf0 (Alt + H)">Rav3nf0</a>
+            <a href="https://rav3nf0.github.io/" accesskey="h" title="Rav3nf0 (Alt + H)">Rav3nf0</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -67,22 +130,22 @@
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/" title="Home">
+                <a href="https://rav3nf0.github.io/" title="Home">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/posts/" title="Blog">
+                <a href="https://rav3nf0.github.io/posts/" title="Blog">
                     <span>Blog</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/tags/" title="Tags">
+                <a href="https://rav3nf0.github.io/tags/" title="Tags">
                     <span>Tags</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/about/" title="About ME">
+                <a href="https://rav3nf0.github.io/about/" title="About ME">
                     <span>About ME</span>
                 </a>
             </li>
@@ -93,7 +156,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://rav3nf0.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://rav3nf0.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       dMSA Trust Model &amp; Vulnerability
     </h1>
@@ -313,16 +376,16 @@
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/tags/red-team/">Red Team</a></li>
-      <li><a href="http://localhost:1313/tags/active-directory/">Active Directory</a></li>
-      <li><a href="http://localhost:1313/tags/privesc/">PrivEsc</a></li>
+      <li><a href="https://rav3nf0.github.io/tags/red-team/">Red Team</a></li>
+      <li><a href="https://rav3nf0.github.io/tags/active-directory/">Active Directory</a></li>
+      <li><a href="https://rav3nf0.github.io/tags/privesc/">PrivEsc</a></li>
     </ul>
   </footer>
 </article>
     </main>
     
 <footer class="footer">
-    <span>&copy; 2025 <a href="http://localhost:1313/">Rav3nf0</a></span>
+    <span>&copy; 2025 <a href="https://rav3nf0.github.io/">Rav3nf0</a></span>
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &

@@ -2,57 +2,57 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Rav3nf0</title>
-    <link>http://localhost:1313/</link>
+    <link>https://rav3nf0.github.io/</link>
     <description>Recent content on Rav3nf0</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 01 Sep 2025 13:40:21 +0530</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://rav3nf0.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>BadSuccessor: From OU Access to Domain Admin</title>
-      <link>http://localhost:1313/posts/dmsa_pt2/</link>
+      <link>https://rav3nf0.github.io/posts/dmsa_pt2/</link>
       <pubDate>Mon, 01 Sep 2025 13:40:21 +0530</pubDate>
-      <guid>http://localhost:1313/posts/dmsa_pt2/</guid>
+      <guid>https://rav3nf0.github.io/posts/dmsa_pt2/</guid>
       <description>With the dMSA trust model explained, let&amp;rsquo;s get into the part 2, on how attackers weaponize it.
 The vulnerability—dubbed BadSuccessor—abuses the migration logic behind dMSAs to create a forged link between any service account and a privileged user. No actual migration required. No permissions over the target needed. Just write access to an Organizational Unit and a little Active Directory knowledge.
 I&amp;rsquo;m going to break down how attackers create fake dMSAs, forge migration attributes, and abuse Kerberos PAC inheritance to escalate privileges—all while staying nearly invisible to traditional detection.</description>
     </item>
     <item>
       <title>dMSA Trust Model &amp; Vulnerability</title>
-      <link>http://localhost:1313/posts/dmsa_pt1/</link>
+      <link>https://rav3nf0.github.io/posts/dmsa_pt1/</link>
       <pubDate>Tue, 17 Jun 2025 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/dmsa_pt1/</guid>
+      <guid>https://rav3nf0.github.io/posts/dmsa_pt1/</guid>
       <description>Microsoft&amp;rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&amp;rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&amp;rsquo;re calling it &amp;ldquo;BadSuccessor&amp;rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw.</description>
     </item>
     <item>
       <title>About ME</title>
-      <link>http://localhost:1313/about/</link>
+      <link>https://rav3nf0.github.io/about/</link>
       <pubDate>Fri, 23 May 2025 14:53:45 +0530</pubDate>
-      <guid>http://localhost:1313/about/</guid>
+      <guid>https://rav3nf0.github.io/about/</guid>
       <description>I’m Aadarsh (aka Rav3nf0) — a security engineer, curious hacker, and builder at heart. I spend my days building secure, scalable systems… and my nights figuring out how to break them (ethically, of course 😈).
-🔐 What I Do Red teaming, Application security, and secure code analysis Building internal tools for detection and prevention Writing &amp;amp; breaking scripts, sometimes at 3am Crafting CTFs and boot2root machines for learning 📌 Current Focus Exploring threat modeling, IAM misconfigs, and automation in Cloud Security and DevSecOps Leveling up in web app &amp;amp; infra security Weight training: chasing that 75kg goal 🏋️ Gotta REACH THE PEAK!</description>
+🔐 What I Do Red teaming, Application security, and secure code analysis Building internal tools for detection and prevention Tearing apart thick client apps to see what they’re really made of Writing &amp;amp; breaking scripts, sometimes at 3am Crafting CTFs and boot2root machines for learning 📌 Current Focus Exploring threat modeling, IAM misconfigs, and automation in Cloud Security and DevSecOps Leveling up in web app &amp;amp; infra security Weight training: chasing that 75kg goal 🏋️ Gotta REACH THE PEAK!</description>
     </item>
     <item>
       <title>GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory</title>
-      <link>http://localhost:1313/posts/gpoddity/</link>
+      <link>https://rav3nf0.github.io/posts/gpoddity/</link>
       <pubDate>Wed, 21 May 2025 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/gpoddity/</guid>
+      <guid>https://rav3nf0.github.io/posts/gpoddity/</guid>
       <description>Introduction Active Directory (AD) security continues to be a critical concern for organizations worldwide. Among the numerous attack vectors that threaten AD environments, GPOddity stands out as a particularly sophisticated technique that leverages Group Policy Objects (GPOs) and NTLM relaying to achieve privilege escalation. First documented by security researchers at Synacktiv, this attack can bypass many common security controls and lead to domain-wide compromise. In this technical deep dive, we&amp;rsquo;ll explore how GPOddity works, why it&amp;rsquo;s dangerous, and how security teams can defend against it.</description>
     </item>
     <item>
       <title>Dattebayo! My HTB Seasonal Conquest</title>
-      <link>http://localhost:1313/posts/plat24/</link>
+      <link>https://rav3nf0.github.io/posts/plat24/</link>
       <pubDate>Sun, 14 Apr 2024 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/plat24/</guid>
+      <guid>https://rav3nf0.github.io/posts/plat24/</guid>
       <description>Prologue Hey there, This blog is not gonna be about the technical nitty-gritty and would be more on my experience and the challenges I faced. Buckle up for a tale of triumph, tribulation, and teamwork – all with a dash of Naruto sprinkled in (dattebayo!). This is the story of my 13-week HTB seasonal conquest!
 Yess, Naruto Fan here !!
 The Mission: Reach for the Holo! HTB uses a ranking system based on the percentage of flags captured during the season.</description>
     </item>
     <item>
       <title>GCC 2024: My Experience</title>
-      <link>http://localhost:1313/posts/gcc24/</link>
+      <link>https://rav3nf0.github.io/posts/gcc24/</link>
       <pubDate>Wed, 28 Feb 2024 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/gcc24/</guid>
+      <guid>https://rav3nf0.github.io/posts/gcc24/</guid>
       <description>Prologue Last week, I alongside with 3 other Indian Students, Sejal, anikait and Rajarshi represented India to participate in GCC 2024 at Thailand. We had an amazing experience representing our country at the Global Cybersecurity Camp (GCC) 2024 in Thailand. This blog isn&amp;rsquo;t about the technical nitty-gritty, but rather about the incredible memories and fun we had during that unforgettable week.
 A big shoutout to VueNow and Traboda for sponsoring this amazing trip!</description>
     </item>

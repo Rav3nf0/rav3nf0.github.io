@@ -2,33 +2,33 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Active Directory on Rav3nf0</title>
-    <link>http://localhost:1313/tags/active-directory/</link>
+    <link>https://rav3nf0.github.io/tags/active-directory/</link>
     <description>Recent content in Active Directory on Rav3nf0</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 01 Sep 2025 13:40:21 +0530</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/active-directory/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://rav3nf0.github.io/tags/active-directory/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>BadSuccessor: From OU Access to Domain Admin</title>
-      <link>http://localhost:1313/posts/dmsa_pt2/</link>
+      <link>https://rav3nf0.github.io/posts/dmsa_pt2/</link>
       <pubDate>Mon, 01 Sep 2025 13:40:21 +0530</pubDate>
-      <guid>http://localhost:1313/posts/dmsa_pt2/</guid>
+      <guid>https://rav3nf0.github.io/posts/dmsa_pt2/</guid>
       <description>With the dMSA trust model explained, let&amp;rsquo;s get into the part 2, on how attackers weaponize it.
 The vulnerability—dubbed BadSuccessor—abuses the migration logic behind dMSAs to create a forged link between any service account and a privileged user. No actual migration required. No permissions over the target needed. Just write access to an Organizational Unit and a little Active Directory knowledge.
 I&amp;rsquo;m going to break down how attackers create fake dMSAs, forge migration attributes, and abuse Kerberos PAC inheritance to escalate privileges—all while staying nearly invisible to traditional detection.</description>
     </item>
     <item>
       <title>dMSA Trust Model &amp; Vulnerability</title>
-      <link>http://localhost:1313/posts/dmsa_pt1/</link>
+      <link>https://rav3nf0.github.io/posts/dmsa_pt1/</link>
       <pubDate>Tue, 17 Jun 2025 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/dmsa_pt1/</guid>
+      <guid>https://rav3nf0.github.io/posts/dmsa_pt1/</guid>
       <description>Microsoft&amp;rsquo;s introduction of Delegated Managed Service Accounts (dMSAs) in Windows Server 2025 was supposed to improve security by replacing those messy legacy service accounts we&amp;rsquo;ve all been dealing with for years. But in late May 2025, security researchers found a devastating flaw in the dMSA implementation—they&amp;rsquo;re calling it &amp;ldquo;BadSuccessor&amp;rdquo;—and it can lead to complete domain takeover.This would be a 3 part blog with the first part digging into dMSA design and PAC flaw.</description>
     </item>
     <item>
       <title>GPOddity: Understanding the Advanced Privilege Escalation Attack in Active Directory</title>
-      <link>http://localhost:1313/posts/gpoddity/</link>
+      <link>https://rav3nf0.github.io/posts/gpoddity/</link>
       <pubDate>Wed, 21 May 2025 12:47:16 +0530</pubDate>
-      <guid>http://localhost:1313/posts/gpoddity/</guid>
+      <guid>https://rav3nf0.github.io/posts/gpoddity/</guid>
       <description>Introduction Active Directory (AD) security continues to be a critical concern for organizations worldwide. Among the numerous attack vectors that threaten AD environments, GPOddity stands out as a particularly sophisticated technique that leverages Group Policy Objects (GPOs) and NTLM relaying to achieve privilege escalation. First documented by security researchers at Synacktiv, this attack can bypass many common security controls and lead to domain-wide compromise. In this technical deep dive, we&amp;rsquo;ll explore how GPOddity works, why it&amp;rsquo;s dangerous, and how security teams can defend against it.</description>
     </item>
   </channel>
