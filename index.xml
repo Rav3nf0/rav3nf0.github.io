@@ -9,9 +9,16 @@
     <lastBuildDate>Mon, 01 Sep 2025 13:40:21 +0530</lastBuildDate>
     <atom:link href="https://rav3nf0.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Secure Coding the Heck Out of Your Web Apps</title>
+      <link>https://rav3nf0.github.io/posts/securecode/</link>
+      <pubDate>Mon, 01 Sep 2025 13:40:21 +0530</pubDate>
+      <guid>https://rav3nf0.github.io/posts/securecode/</guid>
+      <description>In web development, writing secure code isn&amp;rsquo;t just a &amp;ldquo;nice-to-have&amp;rdquo; – it&amp;rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let&amp;rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review.</description>
+    </item>
+    <item>
       <title>BadSuccessor: From OU Access to Domain Admin</title>
       <link>https://rav3nf0.github.io/posts/dmsa_pt2/</link>
-      <pubDate>Mon, 01 Sep 2025 13:40:21 +0530</pubDate>
+      <pubDate>Fri, 01 Aug 2025 13:40:21 +0530</pubDate>
       <guid>https://rav3nf0.github.io/posts/dmsa_pt2/</guid>
       <description>With the dMSA trust model explained, let&amp;rsquo;s get into the part 2, on how attackers weaponize it.
 The vulnerability—dubbed BadSuccessor—abuses the migration logic behind dMSAs to create a forged link between any service account and a privileged user. No actual migration required. No permissions over the target needed. Just write access to an Organizational Unit and a little Active Directory knowledge.

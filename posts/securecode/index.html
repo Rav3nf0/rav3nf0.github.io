@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Secure Coding the Heck Out of Your Web Apps | Rav3nf0</title>
+<meta name="keywords" content="Secure Coding, Product Security, Web">
+<meta name="description" content="In web development, writing secure code isn&rsquo;t just a &ldquo;nice-to-have&rdquo; – it&rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let&rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review.">
+<meta name="author" content="">
+<link rel="canonical" href="https://rav3nf0.github.io/posts/securecode/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.b609c58d5c11bb90b1a54e04005d74ad1ddf22165eb79f5533967e57df9c3b50.css" integrity="sha256-tgnFjVwRu5CxpU4EAF10rR3fIhZet59VM5Z&#43;V9&#43;cO1A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://rav3nf0.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://rav3nf0.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://rav3nf0.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://rav3nf0.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://rav3nf0.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://rav3nf0.github.io/posts/securecode/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+  
+
+<meta property="og:title" content="Secure Coding the Heck Out of Your Web Apps" />
+<meta property="og:description" content="In web development, writing secure code isn&rsquo;t just a &ldquo;nice-to-have&rdquo; – it&rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let&rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://rav3nf0.github.io/posts/securecode/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-09-01T13:40:21+05:30" />
+<meta property="article:modified_time" content="2025-09-01T13:40:21+05:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Secure Coding the Heck Out of Your Web Apps"/>
+<meta name="twitter:description" content="In web development, writing secure code isn&rsquo;t just a &ldquo;nice-to-have&rdquo; – it&rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let&rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://rav3nf0.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Secure Coding the Heck Out of Your Web Apps",
+      "item": "https://rav3nf0.github.io/posts/securecode/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Secure Coding the Heck Out of Your Web Apps",
+  "name": "Secure Coding the Heck Out of Your Web Apps",
+  "description": "In web development, writing secure code isn\u0026rsquo;t just a \u0026ldquo;nice-to-have\u0026rdquo; – it\u0026rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let\u0026rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review.",
+  "keywords": [
+    "Secure Coding", "Product Security", "Web"
+  ],
+  "articleBody": "In web development, writing secure code isn’t just a “nice-to-have” – it’s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let’s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review.\n1. Broken Access Control Broken Access Control – man, this one’s a classic. It’s when users can somehow get their hands on stuff or do things they absolutely shouldn’t. Most of the time, it’s just because the permission structures weren’t fully baked in. Sure, application frameworks have gotten crazy sophisticated lately, but here’s the thing: they don’t magically handle permissions for you. You, the developer, still have to implement that stuff, because every single app has its own weird, custom requirements.\nWhat I Look for in Code Review: When I’m digging through code for broken access control, my eyes are peeled for:\nEndpoints that are just chilling there, handling sensitive data or actions, with no checks for who’s allowed to do what. Direct object references in URLs or parameters that aren’t being validated against the current user’s authorization. I’ve seen too many times where someone could just change an ID in the URL and suddenly see another user’s data. Inconsistent access control – like one function needs a specific role, but a similar function doesn’t bother checking. That’s a red flag. 🚩 How We Fix It: The main way we bat down broken access control is by putting in some seriously solid permission structures.\nIdentity-Based Access Control For operations where a user should only ever see their own data, we make damn sure the user’s ID matches the requested resource’s ID.\nVulnerable Code Example (GET Endpoint for Grades): This code fetches a student’s grade using only the ID from the URL query. An attacker could simply change ?studentid=123 to ?studentid=456 to view another student’s grades.\napp.get('/grades', (req, res) =\u003e { res.setHeader('Content-Type', 'application/json') // VULNERABILITY: No check to see who is logged in! var lookup = {} lookup.studentID = req.query.studentid lookup.subjectID = req.query.subjectid grade = getGrade(lookup) json = JSON.stringify(grade) res.send(json) }) Secure Code Example (GET Endpoint for Grades): This version checks if the requested studentID matches the ID of the currently logged-in user. If they don’t match, access is denied.\napp.get('/grades', (req, res) =\u003e { res.setHeader('Content-Type', 'application/json') // Access Control if (getCurrentUser().studentID != req.query.studentid) { var response = {} response.message = \"Access Denied\" res.json(response) return false } var lookup = {} lookup.studentID = req.query.studentid lookup.subjectID = req.query.subjectid grade = getGrade(lookup) json = JSON.stringify(grade) res.send(json) }) Role-Based Access Control For actions that should only be for certain roles (like only teachers updating grades, not students), we check the user’s role.\nVulnerable Code Example (PATCH Endpoint for Grades): This endpoint allows any authenticated user to update a grade, as there’s no role check. A student could use this to change their own grade.\napp.patch('/grades', (req, res) =\u003e { res.setHeader('Content-Type', 'application/json') // VULNERABILITY: No role check. A student could call this! var grade = {} grade.studentID = req.body.studentID grade.subjectID = req.body.subjectID grade.grade = req.body.grade response = updateGrade(grade) json = JSON.stringify(response) res.send(json) }) Secure Code Example (PATCH Endpoint for Grades): Here, the code first checks if the user has the “teacher” role. If not, the request is denied.\napp.patch('/grades', (req, res) =\u003e { res.setHeader('Content-Type', 'application/json') // Access Control if (getCurrentUser().role != \"teacher\") { var response = {} response.message = \"Access Denied\" res.send(JSON.stringify(response)) return false } var grade = {} grade.studentID = req.body.studentID grade.subjectID = req.body.subjectID grade.grade = req.body.grade response = updateGrade(grade) json = JSON.stringify(response) res.send(json) }) 2. Cross-Site Scripting (XSS) Cross-Site Scripting, or XSS – this one’s a real pain because it’s so popular. It happens when your app takes unvalidated user input and just shoves it right into a web page, letting attackers run their own nasty scripts in someone else’s browser. 👨‍💻\nWhat I Look for in Code Review: Finding every single place where user input gets injected into the response. Checking for any display of data that came from a database. The big one: is there any output encoding around user-controlled data? How We Fix It: Dealing with XSS is all about having multiple layers of defense.\n1. Find the Injection Points First things first, you gotta meticulously find all places in your code where user-supplied data is injected into responses.\n2. Escape the Output This is the most important step for XSS mitigation. You need to HTML-encode all dangerous characters in user-controlled data before you stick it into your HTML output.\nVulnerable Code Example (Displaying a Message): The code takes messageContent straight from the database and inserts it into the HTML. If an attacker saved a message like , it would execute in the browser of anyone who views it.\nfunction generateMessageHTML(messageId) { let messageContent = database.loadContent(messageId); // VULNERABILITY: Unescaped content is inserted directly into HTML. return `${messageContent}\n`; } Secure Code Example (Escaping Message Content): Using a library like lodash.escape, we sanitize the content before rendering it. The browser will now display the script as plain text instead of executing it.\nimport escape from 'lodash.escape'; function generateMessageHTML(messageId) { let messageContent = database.loadContent(messageId); let escapedContent = escape(messageContent); return `${escapedContent}\n`; } 3. Perform Input Validation Validate that user-controlled data is in the exact format you expect before saving it.\nVulnerable Code Example (Saving a Message): This function blindly saves whatever it receives. An attacker could provide a malformed messageId or senderEmail.\n// VULNERABILITY: No validation on input parameters. function handleMessageSend(messageId, senderEmail, messageContent) { database.save(messageId, senderEmail, messageContent); } Secure Code Example (Validating Message ID and Email): Using a library like validator.js, we ensure the messageId is a UUID and senderEmail is a valid email before saving.\nimport isEmail from 'validator/lib/isEmail.js'; import isUUId from 'validator/lib/isUUID.js'; function handleMessageSend(messageId, senderEmail, messageContent) { if (!isUUId(messageId)) { throw new Error(\"validation of messageId parameter failed\"); } if (!isEmail(senderEmail)) { throw new Error(\"validation of email parameter failed\"); } database.save(messageId, senderEmail, messageContent); } 4. Don’t Put User Input in Dangerous Places Look, the mitigations we just talked about work great when user input is just going to be the content of an HTML element (like user_input). But there are some spots where you just never put user-controlled input. These are no-go zones:\nInside a ",
+  "wordCount" : "3205",
+  "inLanguage": "en",
+  "datePublished": "2025-09-01T13:40:21+05:30",
+  "dateModified": "2025-09-01T13:40:21+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rav3nf0.github.io/posts/securecode/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Rav3nf0",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://rav3nf0.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class=" dark" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://rav3nf0.github.io/" accesskey="h" title="Rav3nf0 (Alt + H)">Rav3nf0</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://rav3nf0.github.io/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rav3nf0.github.io/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rav3nf0.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rav3nf0.github.io/about/" title="About ME">
+                    <span>About ME</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://rav3nf0.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://rav3nf0.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Secure Coding the Heck Out of Your Web Apps
+    </h1>
+    <div class="post-meta"><span title='2025-09-01 13:40:21 +0530 IST'>September 1, 2025</span>&nbsp;·&nbsp;16 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-broken-access-control" aria-label="1. Broken Access Control">1. Broken Access Control</a><ul>
+                        
+                <li>
+                    <a href="#what-i-look-for-in-code-review" aria-label="What I Look for in Code Review:">What I Look for in Code Review:</a></li>
+                <li>
+                    <a href="#how-we-fix-it" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#identity-based-access-control" aria-label="Identity-Based Access Control">Identity-Based Access Control</a></li>
+                <li>
+                    <a href="#role-based-access-control" aria-label="Role-Based Access Control">Role-Based Access Control</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#2-cross-site-scripting-xss" aria-label="2. Cross-Site Scripting (XSS)">2. Cross-Site Scripting (XSS)</a><ul>
+                        
+                <li>
+                    <a href="#what-i-look-for-in-code-review-1" aria-label="What I Look for in Code Review:">What I Look for in Code Review:</a></li>
+                <li>
+                    <a href="#how-we-fix-it-1" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-find-the-injection-points" aria-label="1. Find the Injection Points">1. Find the Injection Points</a></li>
+                <li>
+                    <a href="#2-escape-the-output" aria-label="2. Escape the Output">2. Escape the Output</a></li>
+                <li>
+                    <a href="#3-perform-input-validation" aria-label="3. Perform Input Validation">3. Perform Input Validation</a></li>
+                <li>
+                    <a href="#4-dont-put-user-input-in-dangerous-places" aria-label="4. Don&rsquo;t Put User Input in Dangerous Places">4. Don&rsquo;t Put User Input in Dangerous Places</a></li>
+                <li>
+                    <a href="#5-content-security-policy-csp" aria-label="5. Content Security Policy (CSP)">5. Content Security Policy (CSP)</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#3-code-injection" aria-label="3. Code Injection">3. Code Injection</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-2" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-avoid-dangerous-functions" aria-label="1. Avoid Dangerous Functions">1. Avoid Dangerous Functions</a></li>
+                <li>
+                    <a href="#2-reconsider-dynamic-code-execution" aria-label="2. Reconsider Dynamic Code Execution">2. Reconsider Dynamic Code Execution</a></li>
+                <li>
+                    <a href="#3-lock-down-the-interpreter" aria-label="3. Lock Down the Interpreter">3. Lock Down the Interpreter</a></li>
+                <li>
+                    <a href="#4-utilize-a-static-analysis-tool" aria-label="4. Utilize a Static Analysis Tool">4. Utilize a Static Analysis Tool</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#4-cross-site-request-forgery-csrf" aria-label="4. Cross-Site Request Forgery (CSRF)">4. Cross-Site Request Forgery (CSRF)</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-3" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-csrf-tokens" aria-label="1. CSRF Tokens">1. CSRF Tokens</a></li>
+                <li>
+                    <a href="#2-samesite-cookies" aria-label="2. SameSite Cookies">2. SameSite Cookies</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#5-prototype-pollution" aria-label="5. Prototype Pollution">5. Prototype Pollution</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-4" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-use-safe-open-source-libraries-for-recursive-property-setting" aria-label="1. Use Safe Open-Source Libraries for Recursive Property Setting">1. Use Safe Open-Source Libraries for Recursive Property Setting</a></li>
+                <li>
+                    <a href="#2-create-objects-without-prototypes-objectcreatenull" aria-label="2. Create Objects Without Prototypes: Object.create(null)">2. Create Objects Without Prototypes: Object.create(null)</a></li>
+                <li>
+                    <a href="#3-prevent-any-changes-to-the-prototype-objectfreeze" aria-label="3. Prevent Any Changes to the Prototype: Object.freeze()">3. Prevent Any Changes to the Prototype: Object.freeze()</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#6-nosql-injection" aria-label="6. NoSQL Injection">6. NoSQL Injection</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-5" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-sanitize-user-input" aria-label="1. Sanitize User Input">1. Sanitize User Input</a></li>
+                <li>
+                    <a href="#2-avoid-dangerous-operators" aria-label="2. Avoid Dangerous Operators">2. Avoid Dangerous Operators</a></li>
+                <li>
+                    <a href="#3-disable-javascript-execution-if-applicable" aria-label="3. Disable JavaScript Execution (if applicable)">3. Disable JavaScript Execution (if applicable)</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#7-xxe-xml-external-entity" aria-label="7. XXE (XML External Entity)">7. XXE (XML External Entity)</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-6" aria-label="How We Fix It:">How We Fix It:</a></li></ul>
+                </li>
+                <li>
+                    <a href="#8-sql-injection" aria-label="8. SQL Injection">8. SQL Injection</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-7" aria-label="How We Fix It:">How We Fix It:</a></li></ul>
+                </li>
+                <li>
+                    <a href="#9-xpath-injection" aria-label="9. XPath Injection">9. XPath Injection</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-8" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#1-use-an-allowlist" aria-label="1. Use an Allowlist">1. Use an Allowlist</a></li>
+                <li>
+                    <a href="#2-encode-user-input" aria-label="2. Encode User Input">2. Encode User Input</a></li>
+                <li>
+                    <a href="#3-parameterized-xpath-queries" aria-label="3. Parameterized XPath Queries">3. Parameterized XPath Queries</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#10-server-side-request-forgery-ssrf" aria-label="10. Server-Side Request Forgery (SSRF)">10. Server-Side Request Forgery (SSRF)</a><ul>
+                        
+                <li>
+                    <a href="#how-we-fix-it-9" aria-label="How We Fix It:">How We Fix It:</a><ul>
+                        
+                <li>
+                    <a href="#utilize-an-allowlist" aria-label="Utilize an Allowlist">Utilize an Allowlist</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>In web development, writing secure code isn&rsquo;t just a &ldquo;nice-to-have&rdquo; – it&rsquo;s absolutely critical. One tiny vulnerability can blow up in your face, exposing sensitive user data, trampling on privacy, and, let&rsquo;s be real, absolutely trashing your reputation. I want to walk you through some of the most common web application vulnerabilities I see out there, share how we tackle them, and give you some pointers on what I zero in on during a good old-fashioned code review.</p>
+<h2 id="1-broken-access-control">1. Broken Access Control<a hidden class="anchor" aria-hidden="true" href="#1-broken-access-control">#</a></h2>
+<p>Broken Access Control – man, this one&rsquo;s a classic. It&rsquo;s when users can somehow get their hands on stuff or do things they absolutely shouldn&rsquo;t. Most of the time, it&rsquo;s just because the permission structures weren&rsquo;t fully baked in. Sure, application frameworks have gotten crazy sophisticated lately, but here&rsquo;s the thing: they don&rsquo;t magically handle permissions for you. You, the developer, still have to implement that stuff, because every single app has its own weird, custom requirements.</p>
+<h3 id="what-i-look-for-in-code-review">What I Look for in Code Review:<a hidden class="anchor" aria-hidden="true" href="#what-i-look-for-in-code-review">#</a></h3>
+<p>When I&rsquo;m digging through code for broken access control, my eyes are peeled for:</p>
+<ul>
+<li>Endpoints that are just chilling there, handling sensitive data or actions, with no checks for who&rsquo;s allowed to do what.</li>
+<li><strong>Direct object references</strong> in URLs or parameters that aren&rsquo;t being validated against the current user&rsquo;s authorization. I&rsquo;ve seen too many times where someone could just change an ID in the URL and suddenly see another user&rsquo;s data.</li>
+<li>Inconsistent access control – like one function needs a specific role, but a similar function doesn&rsquo;t bother checking. That&rsquo;s a red flag. 🚩</li>
+</ul>
+<h3 id="how-we-fix-it">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it">#</a></h3>
+<p>The main way we bat down broken access control is by putting in some seriously solid permission structures.</p>
+<h4 id="identity-based-access-control">Identity-Based Access Control<a hidden class="anchor" aria-hidden="true" href="#identity-based-access-control">#</a></h4>
+<p>For operations where a user should only ever see <em>their own</em> data, we make damn sure the user&rsquo;s ID matches the requested resource&rsquo;s ID.</p>
+<p><strong>Vulnerable Code Example (GET Endpoint for Grades):</strong> This code fetches a student&rsquo;s grade using only the ID from the URL query. An attacker could simply change ?studentid=123 to ?studentid=456 to view another student&rsquo;s grades.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/grades&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: No check to see who is logged in!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">lookup</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lookup</span>.<span style="color:#a6e22e">studentID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">studentid</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lookup</span>.<span style="color:#a6e22e">subjectID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">subjectid</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getGrade</span>(<span style="color:#a6e22e">lookup</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">json</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">grade</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">json</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p><strong>Secure Code Example (GET Endpoint for Grades):</strong> This version checks if the requested studentID matches the ID of the currently logged-in user. If they don&rsquo;t match, access is denied.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/grades&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Access Control
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">getCurrentUser</span>().<span style="color:#a6e22e">studentID</span> <span style="color:#f92672">!=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">studentid</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">message</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Access Denied&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">json</span>(<span style="color:#a6e22e">response</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">lookup</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lookup</span>.<span style="color:#a6e22e">studentID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">studentid</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lookup</span>.<span style="color:#a6e22e">subjectID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">subjectid</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getGrade</span>(<span style="color:#a6e22e">lookup</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">json</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">grade</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">json</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><h4 id="role-based-access-control">Role-Based Access Control<a hidden class="anchor" aria-hidden="true" href="#role-based-access-control">#</a></h4>
+<p>For actions that should only be for certain roles (like only teachers updating grades, not students), we check the user&rsquo;s role.</p>
+<p><strong>Vulnerable Code Example (PATCH Endpoint for Grades):</strong> This endpoint allows <em>any</em> authenticated user to update a grade, as there&rsquo;s no role check. A student could use this to change their own grade.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">patch</span>(<span style="color:#e6db74">&#39;/grades&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: No role check. A student could call this!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">studentID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">studentID</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">subjectID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">subjectID</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">grade</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">updateGrade</span>(<span style="color:#a6e22e">grade</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">json</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">response</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">json</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p><strong>Secure Code Example (PATCH Endpoint for Grades):</strong> Here, the code first checks if the user has the &ldquo;teacher&rdquo; role. If not, the request is denied.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">patch</span>(<span style="color:#e6db74">&#39;/grades&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Access Control
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">getCurrentUser</span>().<span style="color:#a6e22e">role</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;teacher&#34;</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">message</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Access Denied&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">response</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">studentID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">studentID</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">subjectID</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">subjectID</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">grade</span>.<span style="color:#a6e22e">grade</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">grade</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">updateGrade</span>(<span style="color:#a6e22e">grade</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">json</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">response</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">json</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><h2 id="2-cross-site-scripting-xss">2. Cross-Site Scripting (XSS)<a hidden class="anchor" aria-hidden="true" href="#2-cross-site-scripting-xss">#</a></h2>
+<p>Cross-Site Scripting, or XSS – this one&rsquo;s a real pain because it&rsquo;s so popular. It happens when your app takes unvalidated user input and just shoves it right into a web page, letting attackers run their own nasty scripts in someone else&rsquo;s browser. 👨‍💻</p>
+<h3 id="what-i-look-for-in-code-review-1">What I Look for in Code Review:<a hidden class="anchor" aria-hidden="true" href="#what-i-look-for-in-code-review-1">#</a></h3>
+<ul>
+<li>Finding every single place where user input gets injected into the response.</li>
+<li>Checking for any display of data that came from a database.</li>
+<li>The big one: is there <strong>any output encoding</strong> around user-controlled data?</li>
+</ul>
+<h3 id="how-we-fix-it-1">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-1">#</a></h3>
+<p>Dealing with XSS is all about having multiple layers of defense.</p>
+<h4 id="1-find-the-injection-points">1. Find the Injection Points<a hidden class="anchor" aria-hidden="true" href="#1-find-the-injection-points">#</a></h4>
+<p>First things first, you gotta meticulously find all places in your code where user-supplied data is injected into responses.</p>
+<h4 id="2-escape-the-output">2. Escape the Output<a hidden class="anchor" aria-hidden="true" href="#2-escape-the-output">#</a></h4>
+<p>This is the <em>most</em> important step for XSS mitigation. You need to <strong>HTML-encode</strong> all dangerous characters in user-controlled data <em>before</em> you stick it into your HTML output.</p>
+<p><strong>Vulnerable Code Example (Displaying a Message):</strong> The code takes messageContent straight from the database and inserts it into the HTML. If an attacker saved a message like <code>&lt;script&gt;alert('XSS');&lt;/script&gt;</code>, it would execute in the browser of anyone who views it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateMessageHTML</span>(<span style="color:#a6e22e">messageId</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">messageContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">database</span>.<span style="color:#a6e22e">loadContent</span>(<span style="color:#a6e22e">messageId</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: Unescaped content is inserted directly into HTML.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">return</span> <span style="color:#e6db74">`&lt;p class=&#34;messageContent&#34;&gt;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">messageContent</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/p&gt;`</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Secure Code Example (Escaping Message Content):</strong> Using a library like lodash.escape, we sanitize the content before rendering it. The browser will now display the script as plain text instead of executing it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">escape</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;lodash.escape&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateMessageHTML</span>(<span style="color:#a6e22e">messageId</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">messageContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">database</span>.<span style="color:#a6e22e">loadContent</span>(<span style="color:#a6e22e">messageId</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">escapedContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">escape</span>(<span style="color:#a6e22e">messageContent</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#e6db74">`&lt;p class=&#34;messageContent&#34;&gt;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">escapedContent</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/p&gt;`</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="3-perform-input-validation">3. Perform Input Validation<a hidden class="anchor" aria-hidden="true" href="#3-perform-input-validation">#</a></h4>
+<p>Validate that user-controlled data is in the exact format you expect <strong>before</strong> saving it.</p>
+<p><strong>Vulnerable Code Example (Saving a Message):</strong> This function blindly saves whatever it receives. An attacker could provide a malformed messageId or senderEmail.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// VULNERABILITY: No validation on input parameters.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handleMessageSend</span>(<span style="color:#a6e22e">messageId</span>, <span style="color:#a6e22e">senderEmail</span>, <span style="color:#a6e22e">messageContent</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">database</span>.<span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">messageId</span>, <span style="color:#a6e22e">senderEmail</span>, <span style="color:#a6e22e">messageContent</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Secure Code Example (Validating Message ID and Email):</strong> Using a library like validator.js, we ensure the messageId is a UUID and senderEmail is a valid email before saving.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">isEmail</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;validator/lib/isEmail.js&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">isUUId</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;validator/lib/isUUID.js&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handleMessageSend</span>(<span style="color:#a6e22e">messageId</span>, <span style="color:#a6e22e">senderEmail</span>, <span style="color:#a6e22e">messageContent</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">isUUId</span>(<span style="color:#a6e22e">messageId</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;validation of messageId parameter failed&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">isEmail</span>(<span style="color:#a6e22e">senderEmail</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;validation of email parameter failed&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">database</span>.<span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">messageId</span>, <span style="color:#a6e22e">senderEmail</span>, <span style="color:#a6e22e">messageContent</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="4-dont-put-user-input-in-dangerous-places">4. Don&rsquo;t Put User Input in Dangerous Places<a hidden class="anchor" aria-hidden="true" href="#4-dont-put-user-input-in-dangerous-places">#</a></h4>
+<p>Look, the mitigations we just talked about work great when user input is just going to be the <em>content</em> of an HTML element (like <code>&lt;div&gt;user_input&lt;/div&gt;</code>). But there are some spots where you just <strong>never</strong> put user-controlled input. These are no-go zones:</p>
+<ul>
+<li>Inside a <code>&lt;script&gt;</code> tag</li>
+<li>Inside CSS (like in a <code>&lt;style&gt;</code> tag)</li>
+<li>Inside an HTML attribute (like <code>&lt;div attr=user_input&gt;</code>)</li>
+</ul>
+<h4 id="5-content-security-policy-csp">5. Content Security Policy (CSP)<a hidden class="anchor" aria-hidden="true" href="#5-content-security-policy-csp">#</a></h4>
+<p>CSP is a security feature in web browsers that tells them which content sources are safe to load and run. By listing your allowed domains, you can prevent malicious scripts from unauthorized sources from running.</p>
+<p><strong>Example CSP Policy:</strong></p>
+<pre tabindex="0"><code>Content-Security-Policy: default-src &#39;self&#39; https://trusted-site.example;
+</code></pre><p>In this snippet, <code>default-src</code> means content (like scripts) can come from your own origin (<code>'self'</code>) and from <code>https://trusted-site.example</code>, but anything else? Blocked.</p>
+<h2 id="3-code-injection">3. Code Injection<a hidden class="anchor" aria-hidden="true" href="#3-code-injection">#</a></h2>
+<p>Code injection is pretty nasty – it lets attackers run whatever code they want on your server or their client by injecting malicious code through user input.</p>
+<h3 id="how-we-fix-it-2">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-2">#</a></h3>
+<h4 id="1-avoid-dangerous-functions">1. Avoid Dangerous Functions<a hidden class="anchor" aria-hidden="true" href="#1-avoid-dangerous-functions">#</a></h4>
+<p>In JavaScript, just don&rsquo;t use <code>eval()</code>, <code>setTimeout()</code>, <code>setInterval()</code>, and the Function constructor with user input.</p>
+<p><strong>Vulnerable Code Example (Using eval()):</strong> This code uses <code>eval()</code> to dynamically call a function on a user-provided string. An attacker could inject malicious code by manipulating the name variable.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// VULNERABILITY: The &#39;name&#39; variable comes from user input and is passed to eval().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// An input like `&#34;; require(&#39;child_process&#39;).exec(&#39;rm -rf /&#39;);&#34;` could be catastrophic.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">uppercaseName</span> <span style="color:#f92672">=</span> eval(<span style="color:#e6db74">&#39;&#34;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;&#34;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.toUpperCase()&#39;</span>);
+</span></span></code></pre></div><p><strong>Secure Code Example (Removing eval()):</strong> The same result can be achieved safely and simply without eval().</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">uppercaseName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">name</span>.<span style="color:#a6e22e">toUpperCase</span>();
+</span></span></code></pre></div><h4 id="2-reconsider-dynamic-code-execution">2. Reconsider Dynamic Code Execution<a hidden class="anchor" aria-hidden="true" href="#2-reconsider-dynamic-code-execution">#</a></h4>
+<p>Honestly, just ask yourself, &ldquo;Do I <em>really</em> need to evaluate dynamically generated server-side code here?&rdquo;. Most of the time, this is a sign of bad software design.</p>
+<h4 id="3-lock-down-the-interpreter">3. Lock Down the Interpreter<a hidden class="anchor" aria-hidden="true" href="#3-lock-down-the-interpreter">#</a></h4>
+<p>If possible, configure your server-side interpreter to disable functions that can execute code dynamically. For example, in PHP, you can use the <code>disable_functions</code> directive in your php.ini file.</p>
+<h4 id="4-utilize-a-static-analysis-tool">4. Utilize a Static Analysis Tool<a hidden class="anchor" aria-hidden="true" href="#4-utilize-a-static-analysis-tool">#</a></h4>
+<p>Adding a static application security testing (SAST) tool like Snyk Code to your pipeline is an excellent way to catch these vulnerabilities early.</p>
+<h2 id="4-cross-site-request-forgery-csrf">4. Cross-Site Request Forgery (CSRF)<a hidden class="anchor" aria-hidden="true" href="#4-cross-site-request-forgery-csrf">#</a></h2>
+<p>CSRF is sneaky. It&rsquo;s when an attacker tricks your browser into sending a forged request to a vulnerable web application where you&rsquo;re already logged in.</p>
+<h3 id="how-we-fix-it-3">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-3">#</a></h3>
+<h4 id="1-csrf-tokens">1. CSRF Tokens<a hidden class="anchor" aria-hidden="true" href="#1-csrf-tokens">#</a></h4>
+<p>One of the best ways to fight CSRF is by using a random, unique token for each request. The server validates this token to ensure the request is legitimate.</p>
+<p><strong>Vulnerable Code Example (State-Changing Form):</strong> This form transfers money. An attacker could host a webpage with a hidden, auto-submitting version of this form. If a logged-in user visits the attacker&rsquo;s page, their browser will submit the form and transfer funds without their knowledge.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://saturnbank.com/transfer&#34;</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;POST&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hidden&#34;</span> <span style="color:#a6e22e">bsb</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;421314&#34;</span> <span style="color:#a6e22e">accountNo</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1736123125&#34;</span> <span style="color:#a6e22e">amount</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">p</span>&gt;Click here for a free vacation!&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;submit&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Claim Now!&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">form</span>&gt;
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/transfer&#39;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: No token validation. Processes any request.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// ... transfer logic ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><p><strong>Secure Code Example (Using CSRF Tokens):</strong> The form now includes a hidden field with a unique csrfToken. The server-side endpoint uses csrfProtection middleware to validate this token before processing the request.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://saturnbank.com/transfer&#34;</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;POST&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hidden&#34;</span> <span style="color:#a6e22e">bsb</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;421314&#34;</span> <span style="color:#a6e22e">accountNo</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1736123125&#34;</span> <span style="color:#a6e22e">amount</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hidden&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;_csrf&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&lt;%= csrfToken %&gt;&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">form</span>&gt;
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// FIX: Add CSRF protection middleware to the route.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/transfer&#39;</span>, <span style="color:#a6e22e">csrfProtection</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// This code only runs if the CSRF token is valid.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// …
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><h4 id="2-samesite-cookies">2. SameSite Cookies<a hidden class="anchor" aria-hidden="true" href="#2-samesite-cookies">#</a></h4>
+<p>Another solid defense is adding the SameSite attribute to your cookies. This tells the browser whether to send the cookie along with cross-site requests.</p>
+<ul>
+<li><code>SameSite=Strict</code>: The browser will <em>never</em> include the cookie in requests that came from another site.</li>
+<li><code>SameSite=Lax</code>: A bit more permissive, it allows the cookie on top-level GET requests.</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre tabindex="0"><code>Set-Cookie: SessionId=sYMnfCUrAlmqVVZn9dqevxyFpKZt30NN; SameSite=Strict;
+</code></pre><h2 id="5-prototype-pollution">5. Prototype Pollution<a hidden class="anchor" aria-hidden="true" href="#5-prototype-pollution">#</a></h2>
+<p>Prototype pollution attacks are devious. They exploit how JavaScript handles object prototypes to modify an object&rsquo;s prototype, which can lead to application-wide vulnerabilities.</p>
+<h3 id="how-we-fix-it-4">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-4">#</a></h3>
+<h4 id="1-use-safe-open-source-libraries-for-recursive-property-setting">1. Use Safe Open-Source Libraries for Recursive Property Setting<a hidden class="anchor" aria-hidden="true" href="#1-use-safe-open-source-libraries-for-recursive-property-setting">#</a></h4>
+<p>Don&rsquo;t write your own recursive merge functions. Use a trusted, secure library like lodash.merge.</p>
+<p><strong>Vulnerable Code Example (Unsafe Merge):</strong> This custom merge function recursively assigns properties. An attacker can provide a malicious JSON payload like <code>{&quot;__proto__&quot;: {&quot;isAdmin&quot;: true}}</code>. This will add an <code>isAdmin</code> property to <em>every</em> object in the application, potentially granting admin rights.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">target</span>, <span style="color:#a6e22e">source</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">key</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">source</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">key</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">source</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">key</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">target</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">target</span>[<span style="color:#a6e22e">key</span>], <span style="color:#a6e22e">source</span>[<span style="color:#a6e22e">key</span>]);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">target</span>[<span style="color:#a6e22e">key</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">source</span>[<span style="color:#a6e22e">key</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// VULNERABILITY: Unsafe merge can be exploited.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">updateUser</span>(<span style="color:#a6e22e">userId</span>, <span style="color:#a6e22e">requestBody</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">userData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">loadUserData</span>(<span style="color:#a6e22e">userId</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">userData</span>, <span style="color:#a6e22e">requestBody</span>); <span style="color:#75715e">// Malicious requestBody pollutes Object.prototype
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">saveUserData</span>(<span style="color:#a6e22e">userId</span>, <span style="color:#a6e22e">userData</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">userData</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Secure Code Example (Using lodash.merge):</strong> The lodash.merge library is designed to prevent prototype pollution.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">safeMerge</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;lodash.merge&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">updateUser</span>(<span style="color:#a6e22e">userId</span>, <span style="color:#a6e22e">requestBody</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">userData</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">loadUserData</span>(<span style="color:#a6e22e">userId</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// FIX: Use a library that safely merges objects.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">safeMerge</span>(<span style="color:#a6e22e">userData</span>, <span style="color:#a6e22e">requestBody</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">saveUserData</span>(<span style="color:#a6e22e">userId</span>, <span style="color:#a6e22e">userData</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">userData</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="2-create-objects-without-prototypes-objectcreatenull">2. Create Objects Without Prototypes: Object.create(null)<a hidden class="anchor" aria-hidden="true" href="#2-create-objects-without-prototypes-objectcreatenull">#</a></h4>
+<p>If you create an object using <code>Object.create(null)</code>, it won&rsquo;t have a prototype, making it immune to pollution.</p>
+<h4 id="3-prevent-any-changes-to-the-prototype-objectfreeze">3. Prevent Any Changes to the Prototype: Object.freeze()<a hidden class="anchor" aria-hidden="true" href="#3-prevent-any-changes-to-the-prototype-objectfreeze">#</a></h4>
+<p>You can freeze the default object prototype to prevent any modifications to it. A simple way is to use the nopp npm package or call <code>Object.freeze(Object.prototype)</code> once when your application starts.</p>
+<h2 id="6-nosql-injection">6. NoSQL Injection<a hidden class="anchor" aria-hidden="true" href="#6-nosql-injection">#</a></h2>
+<p>NoSQL injection lets attackers mess with your NoSQL database queries through malicious user input, which can even lead to remote code execution.</p>
+<h3 id="how-we-fix-it-5">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-5">#</a></h3>
+<h4 id="1-sanitize-user-input">1. Sanitize User Input<a hidden class="anchor" aria-hidden="true" href="#1-sanitize-user-input">#</a></h4>
+<p>The core of NoSQL injection mitigation is to strictly validate and sanitize any user-supplied input.</p>
+<p><strong>Vulnerable Code Example (Login Page):</strong> The query uses <code>req.body.username</code> and <code>req.body.password</code> directly. An attacker could submit a JSON object instead of a string for the password, like <code>{&quot;$ne&quot;: null}</code>, which would change the query logic to <code>password != null</code>, logging them in as the first user in the database.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: User input is used directly in the query.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">query</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">username</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">username</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">password</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">password</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#e6db74">&#39;user&#39;</span>).<span style="color:#a6e22e">findOne</span>(<span style="color:#a6e22e">query</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">user</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  });
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p><strong>Secure Code Example (Login Page Mitigation):</strong> By casting the user input to a string, we prevent an attacker from sending a malicious query object. The database will now literally search for a password string like &ldquo;[object Object]&rdquo;, which will fail.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// FIX: Cast all user input to the expected type (String).
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">=</span> String(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">username</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">pass</span> <span style="color:#f92672">=</span> String(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">password</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">query</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">username</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">user</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">password</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">pass</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#e6db74">&#39;user&#39;</span>).<span style="color:#a6e22e">findOne</span>(<span style="color:#a6e22e">query</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">user</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  });
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h4 id="2-avoid-dangerous-operators">2. Avoid Dangerous Operators<a hidden class="anchor" aria-hidden="true" href="#2-avoid-dangerous-operators">#</a></h4>
+<p>Avoid using dangerous operators such as <code>$where</code>, <code>mapReduce</code>, and <code>$group</code> with user-provided data.</p>
+<h4 id="3-disable-javascript-execution-if-applicable">3. Disable JavaScript Execution (if applicable)<a hidden class="anchor" aria-hidden="true" href="#3-disable-javascript-execution-if-applicable">#</a></h4>
+<p>To stop JavaScript from executing in certain NoSQL databases like MongoDB, set <code>javascriptEnabled</code> to false in the mongod.conf file.</p>
+<h2 id="7-xxe-xml-external-entity">7. XXE (XML External Entity)<a hidden class="anchor" aria-hidden="true" href="#7-xxe-xml-external-entity">#</a></h2>
+<p>XXE vulnerabilities occur when an XML parser improperly processes external entity references, allowing an attacker to read local files or perform other malicious actions.</p>
+<h3 id="how-we-fix-it-6">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-6">#</a></h3>
+<p>The safest way to mitigate XXE is by configuring your XML parser to disable DTDs (Document Type Definitions) and external entities.</p>
+<p><strong>Vulnerable Code Example (libxmljs):</strong> The <code>noent:true</code> option tells the parser to replace entities, including external ones. An attacker can submit XML with a malicious entity that points to a local file, like <code>/etc/passwd</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">libxml</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;libxmljs&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#34;/profile/favorites&#34;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: The noent:true option enables external entity processing.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// An attacker could submit: &lt;?xml version=&#34;1.0&#34; ?&gt;&lt;!DOCTYPE r [&lt;!ENTITY xxe SYSTEM &#34;file:///etc/passwd&#34;&gt;]&gt;&lt;favorite&gt;&amp;xxe;&lt;/favorite&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">favorite</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">libxml</span>.<span style="color:#a6e22e">parseXml</span>(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>, { <span style="color:#a6e22e">noent</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span> });
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">addToFavorites</span>(<span style="color:#a6e22e">favorite</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p><strong>Secure Code Example (libxmljs Mitigation):</strong> Most modern XML parsers, including libxmljs, disable external entities by default. The fix is simply to remove the option that enables them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">libxml</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;libxmljs&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#34;/profile/favorites&#34;</span>, (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// FIX: Removed the dangerous noent:true option.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">favorite</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">libxml</span>.<span style="color:#a6e22e">parseXml</span>(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">body</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">addToFavorites</span>(<span style="color:#a6e22e">favorite</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h2 id="8-sql-injection">8. SQL Injection<a hidden class="anchor" aria-hidden="true" href="#8-sql-injection">#</a></h2>
+<p>SQL injection is still very much a thing. It&rsquo;s when an attacker manipulates user-supplied input to alter the logic of your database queries.</p>
+<h3 id="how-we-fix-it-7">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-7">#</a></h3>
+<p>The best way to prevent SQL injection is to use <strong>parameterized queries</strong> (also known as prepared statements). This separates the query logic from the data.</p>
+<p><strong>Vulnerable Code Example (User Login):</strong> This code builds a SQL query by concatenating strings with user input. An attacker can enter <code>' OR 1=1 --</code> as the password. The resulting query becomes <code>SELECT email FROM credentials WHERE email= 'user@example.com' AND password= '' OR 1=1 -- '</code>, which is always true, bypassing the login.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">checkUser</span>(
+</span></span><span style="display:flex;"><span>  HttpServletRequest req, Connection con) <span style="color:#66d9ef">throws</span> SQLException {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: Query is built by concatenating user input.</span>
+</span></span><span style="display:flex;"><span>  String sqlQuery <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;SELECT email FROM credentials &#34;</span> <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;WHERE email=&#39;&#34;</span> <span style="color:#f92672">+</span> req.<span style="color:#a6e22e">getParameter</span>(<span style="color:#e6db74">&#34;email&#34;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; &#34;</span> <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;AND password=&#39;&#34;</span> <span style="color:#f92672">+</span> req.<span style="color:#a6e22e">getParameter</span>(<span style="color:#e6db74">&#34;password&#34;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;&#34;</span>;
+</span></span><span style="display:flex;"><span>  Statement statement <span style="color:#f92672">=</span> con.<span style="color:#a6e22e">createStatement</span>();
+</span></span><span style="display:flex;"><span>  ResultSet rs <span style="color:#f92672">=</span> statement.<span style="color:#a6e22e">executeQuery</span>(sqlQuery);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> rs.<span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Secure Code Example (Using Prepared Statements):</strong> This version uses a PreparedStatement with placeholders (?). The database treats the user input as literal data, not executable SQL code, neutralizing the attack.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">checkUser</span>(
+</span></span><span style="display:flex;"><span>  HttpServletRequest req, Connection con) <span style="color:#66d9ef">throws</span> SQLException {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// FIX: Use a PreparedStatement with placeholders.</span>
+</span></span><span style="display:flex;"><span>  String sqlQuery <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;SELECT email FROM credentials &#34;</span> <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;WHERE email= ? &#34;</span> <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;AND password= ? &#34;</span>;
+</span></span><span style="display:flex;"><span>  PreparedStatement statement <span style="color:#f92672">=</span> con.<span style="color:#a6e22e">prepareStatement</span>(sqlQuery);
+</span></span><span style="display:flex;"><span>  statement.<span style="color:#a6e22e">setString</span>(1, req.<span style="color:#a6e22e">getParameter</span>(<span style="color:#e6db74">&#34;email&#34;</span>));
+</span></span><span style="display:flex;"><span>  statement.<span style="color:#a6e22e">setString</span>(2, req.<span style="color:#a6e22e">getParameter</span>(<span style="color:#e6db74">&#34;password&#34;</span>));
+</span></span><span style="display:flex;"><span>  ResultSet rs <span style="color:#f92672">=</span> statement.<span style="color:#a6e22e">executeQuery</span>(); <span style="color:#75715e">// Note: No argument here</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> rs.<span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="9-xpath-injection">9. XPath Injection<a hidden class="anchor" aria-hidden="true" href="#9-xpath-injection">#</a></h2>
+<p>Similar to SQL injection, XPath injection occurs when user input is used to construct an XPath query, potentially allowing unauthorized access to XML data.</p>
+<h3 id="how-we-fix-it-8">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-8">#</a></h3>
+<h4 id="1-use-an-allowlist">1. Use an Allowlist<a hidden class="anchor" aria-hidden="true" href="#1-use-an-allowlist">#</a></h4>
+<p>Restrict user input to a set of known-safe characters or patterns.</p>
+<p><strong>Vulnerable Code Example (Team Lookup):</strong> The teamName is taken directly from the user and put into the XPath query. An attacker could input <code>Bears'] | /* | /teams/team[name='Bears</code> to see all data in the XML document.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/showteam&#39;</span>, <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">teamName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">team</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// VULNERABILITY: teamName is used directly in the XPath query.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">query</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/teams/team[name=&#39;&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">teamName</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;]/members/member/name/text()&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">nodes</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xpath</span>.<span style="color:#a6e22e">select</span>(<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">doc</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><p><strong>Secure Code Example (Using an Allowlist):</strong> This code uses a regular expression to ensure teamName only contains letters. If it contains anything else, the request is rejected.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/showteam&#39;</span>, <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">teamName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">team</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">re</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">/^[A-Za-z]+$/g</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// FIX: Validate input against an allowlist.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span> <span style="color:#a6e22e">re</span>.<span style="color:#a6e22e">test</span>(<span style="color:#a6e22e">teamName</span>) ) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;invalid team name&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">query</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/teams/team[name=&#39;&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">teamName</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;]/members/member/name/text()&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">nodes</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xpath</span>.<span style="color:#a6e22e">select</span>(<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">doc</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><h4 id="2-encode-user-input">2. Encode User Input<a hidden class="anchor" aria-hidden="true" href="#2-encode-user-input">#</a></h4>
+<p>Encode special characters in the user input so they are treated as literal text.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">encode</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;html-entities&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// FIX: Encode the input to neutralize special characters like &#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">nodes</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xpath</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#34;/teams/team[name=&#39;&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">encode</span>(<span style="color:#a6e22e">teamName</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;]/members/member/name/text()&#34;</span>, <span style="color:#a6e22e">doc</span>);
+</span></span></code></pre></div><h4 id="3-parameterized-xpath-queries">3. Parameterized XPath Queries<a hidden class="anchor" aria-hidden="true" href="#3-parameterized-xpath-queries">#</a></h4>
+<p>If your library supports it, use parameterized XPath queries. This is the most robust solution, similar to prepared statements for SQL.</p>
+<h2 id="10-server-side-request-forgery-ssrf">10. Server-Side Request Forgery (SSRF)<a hidden class="anchor" aria-hidden="true" href="#10-server-side-request-forgery-ssrf">#</a></h2>
+<p>SSRF vulnerabilities occur when a web application fetches a remote resource without validating the user-supplied URL, allowing an attacker to make the server send requests to unintended internal systems.</p>
+<h3 id="how-we-fix-it-9">How We Fix It:<a hidden class="anchor" aria-hidden="true" href="#how-we-fix-it-9">#</a></h3>
+<h4 id="utilize-an-allowlist">Utilize an Allowlist<a hidden class="anchor" aria-hidden="true" href="#utilize-an-allowlist">#</a></h4>
+<p>This is the most robust approach. If your application needs to fetch resources from other URLs, maintain a strict allowlist of approved domains or IP addresses.</p>
+<p><strong>Vulnerable Code Example (Image Fetcher):</strong> This endpoint fetches an image from any URL provided by the user. An attacker could provide an internal IP address like <code>http://169.254.169.254/latest/meta-data/</code> (the AWS metadata service) to steal cloud credentials.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">axios</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;axios&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/fetch-image&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">url</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// VULNERABILITY: The app makes a request to any URL the user provides.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">axios</span>.<span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">url</span>, { <span style="color:#a6e22e">responseType</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;stream&#39;</span> });
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">res</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">500</span>).<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Error fetching image&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p><strong>Secure Code Example (Using an Allowlist):</strong> This version checks if the hostname from the user-provided URL is on a pre-approved list. If not, the request is blocked.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">axios</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;axios&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">URL</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;url&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ALLOWED_HOSTS</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;images.example.com&#39;</span>, <span style="color:#e6db74">&#39;media.example.org&#39;</span>];
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/fetch-image&#39;</span>, <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">url</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">query</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">requestedUrl</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URL</span>(<span style="color:#a6e22e">url</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// FIX: Check if the requested hostname is in the allowlist.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">ALLOWED_HOSTS</span>.<span style="color:#a6e22e">includes</span>(<span style="color:#a6e22e">requestedUrl</span>.<span style="color:#a6e22e">hostname</span>)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">400</span>).<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Invalid host.&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">axios</span>.<span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">requestedUrl</span>.<span style="color:#a6e22e">href</span>, { <span style="color:#a6e22e">responseType</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;stream&#39;</span> });
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">res</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span>(<span style="color:#ae81ff">500</span>).<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;Error fetching image or invalid URL.&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>Be careful with DNS rebinding attacks and redirects. An allowlist is your strongest defense.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Look, baking security into your code and doing thorough code reviews aren&rsquo;t just checkboxes – they&rsquo;re absolutely essential for building robust web applications. By really understanding these common vulnerabilities and by actually putting these mitigation strategies into practice, you can seriously boost your app&rsquo;s security posture. Remember to lean on <strong>trusted libraries</strong>, be super strict with <strong>validating and escaping user input</strong>, and use <strong>static analysis tools</strong> constantly to find and fix those security holes before they become a real headache. 🛡️</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://rav3nf0.github.io/tags/secure-coding/">Secure Coding</a></li>
+      <li><a href="https://rav3nf0.github.io/tags/product-security/">Product Security</a></li>
+      <li><a href="https://rav3nf0.github.io/tags/web/">Web</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2025 <a href="https://rav3nf0.github.io/">Rav3nf0</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
